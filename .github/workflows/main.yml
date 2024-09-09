@@ -23,5 +23,5 @@ jobs:
       REGION: "il-central-1"
       CPU_ARCH: "arm64"
       OS: "amzn2023"
-      APP: "elasticsearch"
+      APP: "elastic"
       TOOLKIT_VERSION: "default"
