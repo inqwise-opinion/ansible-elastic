@@ -9,6 +9,14 @@ users_groups:
 users:
   - name: "{{ app_user }}"
     group: "{{ app_group }}"
+    append: true
+    system: true
+    create_home: false
+    shell: /sbin/nologin
+  - name: consult
+    sudo_options: "ALL=(ALL) NOPASSWD: /bin/systemctl restart elasticsearch"
+    groups:
+      - "{{ app_group }}"
     append: yes
 disk:
     name: /dev/sdb
@@ -20,13 +28,12 @@ disk:
     user: "{{ app_user }}"
     group: "{{ app_group }}"
     kms_key_id: "{{ disk_kms_key_id }}"
-    delete_on_termination: yes
+    delete_on_termination: true
     app: elastic-data
     enable: "{{ node_data }}"
 node_data: false
 node_master: false
-es_memory_size: 1g
 es_cluster_name: opinion
 consul_cluster_tag_value: v1
-private_ip: "{{ ansible_default_ipv4['address'] }}"
+private_ip: "{{ ansible_default_ipv4.address }}"
 aws_iam_role: "elastic-role"
