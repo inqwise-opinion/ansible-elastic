@@ -22,6 +22,32 @@
       es_memory_size: "es_memory_size"
       seed_hosts: "seed_hosts"
 
+- name: Consul Agent role
+  ansible.builtin.import_role:
+    name: inqwise.common.consul
+  vars:
+    consul_bind_addr: "{{ private_ip }}"
+    consul_retry_join: '["consul.{{ private_domain }}"]'
+    consul_datacenter: "{{ environment_name }}-dc-1"
+    consul_server: false
+    consul_ui: false
+    consul_services:
+      - name: "elasticsearch"
+        tags:
+          - "search"
+          - "es"
+          - "elastic-{{ 'master' if node_master else 'data' }}"
+        meta:
+          role: "{{ 'master' if node_master else 'data' }}"
+        port: 9200
+        check:
+          id: "elasticsearch-health"
+          name: "Elasticsearch Health Check"
+          http: "http://localhost:9200/_cluster/health"
+          interval: "10s"
+          timeout: "5s"
+          method: "GET"
+
 - name: Elastic Role
   ansible.builtin.import_role:
     name: inqwise.stacktrek.elastic
@@ -56,8 +82,6 @@
     alloy_user_groups:
       - systemd-journal
       - "{{ app_group }}"
-    env_file_vars:
-      CUSTOM_ARGS: "--server.http.listen-addr=0.0.0.0:12345 --disable-reporting=true --stability.level=public-preview"
     config: |
       loki.write "local" {
         endpoint {
